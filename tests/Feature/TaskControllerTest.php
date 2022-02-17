@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Database\Factories\TaskFactory;
 use Tests\TestCase;
+use App\Models\User;
 
 class TaskControllerTest extends TestCase
 {
@@ -47,6 +48,30 @@ class TaskControllerTest extends TestCase
             ]);
     }
 
+    public function test_user_can_login()
+    {
+
+        $this->postJson('api/users', [
+            'email' => "test@gmail.com",
+            'password' => '12345'
+        ])->assertSuccessful()->dump()->assertJson([
+            'data' => [
+                'id' => 1,
+                'email' => 'test@gmail.com',
+                'password' => '12345',
+            ]
+        ]);;
+
+    }
+
+    public function test_user_is_requiered()
+    {
+        $this->postJson('api/users', [
+            'email' => "test@gmail.com",
+            'password' => "12345",
+        ])->assertValid('email' | 'password');
+    }
+
     public function test_task_is_incompleted_by_default()
     {
         $this->postJson('api/tasks', [
@@ -73,20 +98,20 @@ class TaskControllerTest extends TestCase
     {
         TaskFactory::new()->create([
             'title' => 'old title',
-            'description'=>'hhhh',
+            'description' => 'hhhh',
             'status' => false,
         ]);
 
         $this->putJson('api/tasks/1', [
             'title' => "new title",
-            'description'=>'hhhh',
+            'description' => 'hhhh',
             'status' => true,
         ])->assertSuccessful()
             ->assertJson([
                 'data' => [
                     'id' => 1,
                     'title' => 'new title',
-                    'description'=>'hhhh',
+                    'description' => 'hhhh',
                     'status' => true,
                 ]
             ]);
